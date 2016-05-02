@@ -2,33 +2,34 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include<QToolBar>
-#include<QListView>
-#include<QHBoxLayout>
-#include<QAction>
-#include<QtSql>
-#include<QTableView>
+#include<QTimer>
+#include<QTime>
+
+namespace Ui {
+class MainWindow;
+}
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 private:
-    QAction* startAct;
-    QAction* pauseAct;
-    QAction* stopAct;
-    QToolBar* toolBar;
-    QListView* catogeryView;
-    QTableView* workflowView;
-    QHBoxLayout* centerLayout;
-    QWidget* centerWidget;
-    int taskNameIdx, startDateIdx, startTimeIdx, stopTimeIdx;
+    Ui::MainWindow *ui;
+    QTimer timer;
+    QTime startTime;
+    QTime stopTime;
+    int timelength;    // time length set for a period, in s
 
-    void showError(const QSqlError &err);
+private slots:
+    void timeoutAlert();    // when a timer period is up, change window components
+    void startTimer();
+    void stopTimer();
+    void pauseTimer();
+    void updateTimelength(double);
 };
 
 #endif // MAINWINDOW_H

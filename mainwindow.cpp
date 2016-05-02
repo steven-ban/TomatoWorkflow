@@ -1,76 +1,82 @@
 #include "mainwindow.h"
-#include "initdb.h"
+#include "ui_mainwindow.h"
 
 #include<QMessageBox>
+#include<QTime>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
 {
-    setWindowTitle(tr("Tomato Workflow"));
-    setMinimumSize(800, 600);
+    ui->setupUi(this);
+    connect(ui->doubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateTimelength(double)));
+    //init progressbar
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(this->timelength);
+    ui->progressBar->setValue(0);
+    connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startTimer()));
 
-    // draw the window layouts
-    toolBar = new QToolBar(tr("T&Imer"), this);
-    startAct = new QAction(tr("&Start"), this);
-    pauseAct = new QAction(tr("&Pause"), this);
-    stopAct = new QAction(tr("S&Top"), this);
-    toolBar->addAction(startAct);
-    toolBar->addAction(pauseAct);
-    toolBar->addAction(stopAct);
-    addToolBar(toolBar);
+    connect(ui->pauseButton, SIGNAL(clicked()), this, SLOT(pauseTimer()));
+    connect(ui->stopButton, SIGNAL(clicked()), this, SLOT(stopTimer()));
+    connect(&(this->timer), SIGNAL(timeout()), this, SLOT(timeoutAlert()));
 
-    // test database fetchable
-    if(!QSqlDatabase::drivers().contains("QSQLITE"))
-        QMessageBox::critical(this, tr("Load database error!"), tr("This application needs SQLITE driver!"));
-
-    //initialize the database
-    QSqlError err = initDb();
-    if(err.type() != QSqlError::NoError){
-        showError(err);
-        return;
-    }
-
-    QSqlTableModel *model = new QSqlTableModel(this);
-    model->setTable("tomato_record");
-    taskNameIdx = model->fieldIndex("task_name");
-    startDateIdx = model->fieldIndex("start_date");
-    startTimeIdx = model->fieldIndex("start_time");
-    stopTimeIdx = model->fieldIndex("stop_time");
-    model->setHeaderData(taskNameIdx, Qt::Horizontal, tr("Task Name"));
-    model->setHeaderData(startDateIdx, Qt::Horizontal, tr("Task Date"));
-    model->setHeaderData(startTimeIdx, Qt::Horizontal, tr("Start Time"));
-    model->setHeaderData(stopTimeIdx, Qt::Horizontal, tr("Stop Time"));
-
-    // populate the model
-    if(!model->select()){
-        showError(model->lastError());
-        return;
-    }
-
-
-    catogeryView = new QListView(this);
-    workflowView = new QTableView(this);
-    workflowView->setModel(model);
-    workflowView->hideColumn(0);
-    centerLayout = new QHBoxLayout();
-    centerWidget = new QWidget(this);
-    centerLayout->addWidget(catogeryView);
-    centerLayout->addWidget(workflowView);
-    centerWidget->setLayout(centerLayout);
-    setCentralWidget(centerWidget);
-
-
-
+    //this->updateProgressBar();
 
 }
 
-void MainWindow::showError(const QSqlError &err)
-{
-    QMessageBox::critical(this, "Unable to initialize Database",
-                "Error initializing database: " + err.text());
+void MainWindow::updateTimelength(double time){
+    // time set by double spin box, in min
+    this->timelength = (int)time * 60; // in s
+}
+
+// this function now is wrong
+void MainWindow::pauseTimer(){
+    this->timelength -= this->stopTime.elapsed();
+    this->timer.setInterval(this->timelength);
+    this->stopTime = QTime::currentTime();
+    this->timer.stop();
+
+    QMessageBox msgBox;
+    msgBox.setText(tr("Timer paused. Task time remains (s) : "));
+    msgBox.setInformativeText(QString::number(this->timelength / 1000));
+    msgBox.exec();
+}
+
+void MainWindow::stopTimer(){
+    double elapsedTime = this->stopTime.elapsed();
+    this->stopTime = QTime::currentTime();
+    this->timer.stop();
+
+    QMessageBox msgBox;
+    msgBox.setText(tr("Task time elapsed (s) : "));
+    msgBox.setInformativeText(QString::number(elapsedTime / 1000));
+    msgBox.exec();
+}
+
+void MainWindow::startTimer(){
+    this->startTime = QTime::currentTime(); // use startTime to record init time, it will not change during timer
+    this->stopTime = QTime::currentTime();
+    this->stopTime.start(); // use stopTime to record current time
+    this->timer.start();
+    this->timer.setInterval(1000);  // every 1s, change window components
 }
 
 MainWindow::~MainWindow()
 {
+    delete ui;
+}
+
+
+
+void MainWindow::timeoutAlert(){
+    this->timer.stop();
+    this->stopTime = QTime::currentTime();
+
+    ui->progressBar->setValue(stopTime.elapsed());
+    ui->progressBar->update();
+
+    QMessageBox msgBox ;
+    msgBox.setText(tr("Time up! Get up and walk for a while!"));
+    msgBox.exec();
 
 }
