@@ -23,10 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 }
 
-void MainWindow::updateTimelength(int time){
-    // time set by double spin box, in min
-    this->timelength = time; // in minute
-}
 
 // this function now is wrong
 void MainWindow::pauseTimer(){
@@ -40,19 +36,20 @@ void MainWindow::pauseTimer(){
 }
 
 void MainWindow::stopTimer(){
-    double elapsedTime = this->stopTime.elapsed();
+    // stop by click stop button
+    int elapsedTime = this->stopTime.elapsed();
     this->stopTime = QTime::currentTime();
 
     QMessageBox msgBox;
-    msgBox.setText(tr("Task time elapsed (s) : "));
-    msgBox.setInformativeText(QString::number(elapsedTime / 1000));
+    msgBox.setText(tr("Task time elapsed (min) : "));
+    msgBox.setInformativeText(QString::number(elapsedTime / 60));
     msgBox.exec();
 }
 
 void MainWindow::startTimer(){
     this->startTime = QTime::currentTime(); // use startTime to record init time, it will not change during timer
     this->stopTime = QTime::currentTime();
-    this->stopTime.start(); // use stopTime to record current time
+    this->stopTime.start();
 }
 
 MainWindow::~MainWindow()

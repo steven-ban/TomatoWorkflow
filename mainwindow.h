@@ -28,7 +28,6 @@ private slots:
     void startTimer();
     void stopTimer();
     void pauseTimer();
-    void updateTimelength(double);
 };
 
 #endif // MAINWINDOW_H
