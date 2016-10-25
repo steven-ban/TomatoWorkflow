@@ -19,10 +19,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QTimer timer;
     QTime startTime;
     QTime stopTime;
-    int timelength;    // time length set for a period, in s
+    int timelength;    // time length set for a period, in minute
 
 private slots:
     void timeoutAlert();    // when a timer period is up, change window components

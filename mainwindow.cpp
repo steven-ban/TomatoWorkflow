@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    connect(ui->doubleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(updateTimelength(double)));
+    connect(ui->doubleSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateTimelength(int)));
     //init progressbar
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(this->timelength);
@@ -18,23 +18,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->pauseButton, SIGNAL(clicked()), this, SLOT(pauseTimer()));
     connect(ui->stopButton, SIGNAL(clicked()), this, SLOT(stopTimer()));
-    connect(&(this->timer), SIGNAL(timeout()), this, SLOT(timeoutAlert()));
 
     //this->updateProgressBar();
 
 }
 
-void MainWindow::updateTimelength(double time){
+void MainWindow::updateTimelength(int time){
     // time set by double spin box, in min
-    this->timelength = (int)time * 60; // in s
+    this->timelength = time; // in minute
 }
 
 // this function now is wrong
 void MainWindow::pauseTimer(){
     this->timelength -= this->stopTime.elapsed();
-    this->timer.setInterval(this->timelength);
     this->stopTime = QTime::currentTime();
-    this->timer.stop();
 
     QMessageBox msgBox;
     msgBox.setText(tr("Timer paused. Task time remains (s) : "));
@@ -45,7 +42,6 @@ void MainWindow::pauseTimer(){
 void MainWindow::stopTimer(){
     double elapsedTime = this->stopTime.elapsed();
     this->stopTime = QTime::currentTime();
-    this->timer.stop();
 
     QMessageBox msgBox;
     msgBox.setText(tr("Task time elapsed (s) : "));
@@ -57,8 +53,6 @@ void MainWindow::startTimer(){
     this->startTime = QTime::currentTime(); // use startTime to record init time, it will not change during timer
     this->stopTime = QTime::currentTime();
     this->stopTime.start(); // use stopTime to record current time
-    this->timer.start();
-    this->timer.setInterval(1000);  // every 1s, change window components
 }
 
 MainWindow::~MainWindow()
@@ -69,7 +63,6 @@ MainWindow::~MainWindow()
 
 
 void MainWindow::timeoutAlert(){
-    this->timer.stop();
     this->stopTime = QTime::currentTime();
 
     ui->progressBar->setValue(stopTime.elapsed());
