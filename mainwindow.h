@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include<QTimer>
 #include<QTime>
+#include<QtSql>
 
 namespace Ui {
 class MainWindow;

@@ -38,7 +38,6 @@ void MainWindow::pauseTimer(){
 void MainWindow::stopTimer(){
     // stop by click stop button
     int elapsedTime = this->stopTime.elapsed();
-    this->stopTime = QTime::currentTime();
 
     QMessageBox msgBox;
     msgBox.setText(tr("Task time elapsed (min) : "));
