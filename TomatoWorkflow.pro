@@ -14,8 +14,12 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    task_edit.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    task_edit.h \
+    ui_task_edit.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    task_edit.ui
