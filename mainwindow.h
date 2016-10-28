@@ -3,11 +3,12 @@
 
 #include "ui_task_edit.h"
 
-#include <QMainWindow>
+#include<QMainWindow>
 #include<QTimer>
 #include<QTime>
 #include<QSqlDatabase>
 #include<QSqlTableModel>
+#include<QSqlError>
 
 namespace Ui {
 class MainWindow;
@@ -28,13 +29,14 @@ private:
 
     QTime startTime;
     QTime stopTime;
-    int timelength;    // time length set for a period, in minute
+    int elapsedTime;    // time length set for a period, in seconds
     // database related members
     QSqlDatabase db;
     QSqlTableModel *model;
 
+    QSqlError initDb();
+
 private slots:
-    void timeoutAlert();    // when a timer period is up, change window components
     void startTimer();
     void stopTimer();
     void pauseTimer();
