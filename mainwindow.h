@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -23,12 +23,12 @@ private:
     QTime startTime;
     QTime stopTime;
     int timelength;    // time length set for a period, in s
+    bool pauseFlag;
 
 private slots:
     void timeoutAlert();    // when a timer period is up, change window components
     void startTimer();
     void stopTimer();
-    void pauseTimer();
     void updateTimelength(double);
 };
 

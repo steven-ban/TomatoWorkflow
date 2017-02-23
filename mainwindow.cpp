@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include<QMessageBox>
@@ -15,10 +15,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->progressBar->setMaximum(this->timelength);
     ui->progressBar->setValue(0);
     connect(ui->startButton, SIGNAL(clicked()), this, SLOT(startTimer()));
-
-    connect(ui->pauseButton, SIGNAL(clicked()), this, SLOT(pauseTimer()));
     connect(ui->stopButton, SIGNAL(clicked()), this, SLOT(stopTimer()));
     connect(&(this->timer), SIGNAL(timeout()), this, SLOT(timeoutAlert()));
+
+    this->pauseFlag = false;
 
     //this->updateProgressBar();
 
@@ -29,18 +29,6 @@ void MainWindow::updateTimelength(double time){
     this->timelength = (int)time * 60; // in s
 }
 
-// this function now is wrong
-void MainWindow::pauseTimer(){
-    this->timelength -= this->stopTime.elapsed();
-    this->timer.setInterval(this->timelength);
-    this->stopTime = QTime::currentTime();
-    this->timer.stop();
-
-    QMessageBox msgBox;
-    msgBox.setText(tr("Timer paused. Task time remains (s) : "));
-    msgBox.setInformativeText(QString::number(this->timelength / 1000));
-    msgBox.exec();
-}
 
 void MainWindow::stopTimer(){
     double elapsedTime = this->stopTime.elapsed();
@@ -54,11 +42,31 @@ void MainWindow::stopTimer(){
 }
 
 void MainWindow::startTimer(){
-    this->startTime = QTime::currentTime(); // use startTime to record init time, it will not change during timer
-    this->stopTime = QTime::currentTime();
-    this->stopTime.start(); // use stopTime to record current time
-    this->timer.start();
-    this->timer.setInterval(1000);  // every 1s, change window components
+    if(this->pauseFlag == false){
+        ui->startButton->setText(tr("Pause"));
+        this->pauseFlag = true;
+        this->startTime = QTime::currentTime(); // use startTime to record init time, it will not change during timer
+        this->stopTime = QTime::currentTime();
+        this->stopTime.start(); // use stopTime to record current time
+        this->timer.start();
+        this->timer.setInterval(1000);  // every 1s, change window components
+
+    }
+    else{
+        ui->startButton->setText(tr("Start"));
+        this->pauseFlag = false;
+        this->timelength -= this->stopTime.elapsed();
+        this->timer.setInterval(this->timelength);
+        this->stopTime = QTime::currentTime();
+        this->timer.stop();
+
+        QMessageBox msgBox;
+        msgBox.setText(tr("Timer paused. Task time remains (s) : "));
+        msgBox.setInformativeText(QString::number(this->timelength / 1000));
+        msgBox.exec();
+
+    }
+
 }
 
 MainWindow::~MainWindow()
